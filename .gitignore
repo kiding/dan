@@ -1,3 +1,10 @@
+# Only for Dan
+GetAll.js
+rootfs
+tizen-sdk
+tmp
+db.json
+
 # Logs
 logs
 *.log

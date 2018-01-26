@@ -1,0 +1,10 @@
+{
+  "author": "kiding",
+  "dependencies": {
+    "jison": "^0.4.18",
+    "xml2js": "^0.4.19"
+  },
+  "scripts": {
+    "build": "yarn run jison GetAll.jison"
+  }
+}
