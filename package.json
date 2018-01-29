@@ -1,5 +1,6 @@
 {
   "author": "kiding",
+  "license": "MIT",
   "dependencies": {
     "jison": "^0.4.18",
     "xml2js": "^0.4.19"
