@@ -1,7 +1,5 @@
 {
-  "rootfs": "./rootfs/",
-  "sdb": "./tizen-sdk/tools/sdb",
   "target": "192.168.72.141",
-  "tmp": "./tmp/",
+  "rootfs": "./rootfs/",
   "db": "./db.json"
 }

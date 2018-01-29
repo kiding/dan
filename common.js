@@ -6,36 +6,38 @@ const { execSync } = require('child_process'),
 // Load cfg
 const cfg = {
               ...{
-                rootfs: './rootfs/',
-                sdb: './sdb',
                 target: '192.168.72.111',
-                tmp: './tmp/',
+                rootfs: './rootfs/',
                 db: './db.json'
               },
               ...JSON.parse(readFileSync('./config.json', {encoding: 'utf-8'}))
             };
 
 // Load db
-const db = {
-           ...(existsSync(cfg.db) ? JSON.parse(readFileSync(cfg.db, {encoding: 'utf-8'})) : {})
-         };
+const db = {...(existsSync(cfg.db) ? JSON.parse(readFileSync(cfg.db, {encoding: 'utf-8'})) : {})};
+
+// Tizen Studio CLIs
+const sdb = './tizen-studio/tools/sdb';
+
+// Temp folder
+const tmp = './tmp/';
 
 // Batch command
 const shName = 'cmd.sh',
-      localSh = join(cfg.tmp, shName);
+      localSh = join(tmp, shName);
 
 // (Decompressed) result from the batch command
 const outName = 'cmd.out',
-      localOut = join(cfg.tmp, outName);
+      localOut = join(tmp, outName);
 
 // Compressed result
 const gzName = 'cmd.gz',
-      localGzCwd = cfg.tmp,
+      localGzCwd = tmp,
       localGz = join(localGzCwd, gzName);
 
 // Source code of the helper Gear application
 const cName = 'main.c',
-      localC = join(cfg.tmp, cName);
+      localC = join(tmp, cName);
 
 
 function exec() {
@@ -46,8 +48,8 @@ function exec() {
 }
 
 function clean() {
-  exec(`rm -rf ${cfg.tmp}`);
-  exec(`mkdir -p ${cfg.tmp}`);
+  exec(`rm -rf ${tmp}`);
+  exec(`mkdir -p ${tmp}`);
 }
 
 function connect() {
@@ -56,14 +58,14 @@ function connect() {
   let test = '';
   do {
     try {
-      exec(`${cfg.sdb} disconnect`);
-      exec(`${cfg.sdb} connect ${cfg.target}`);
+      exec(`${sdb} disconnect`);
+      exec(`${sdb} connect ${cfg.target}`);
     } catch (e) {
       console.error(e.message);
     }
 
     try {
-      test = exec(`${cfg.sdb} -s ${cfg.target} shell echo 1`);
+      test = exec(`${sdb} -s ${cfg.target} shell echo 1`);
     } catch (e) {
       console.error(e.message);
     }
@@ -112,21 +114,21 @@ module.exports = {
     const remoteGz = join(remotePwd, gzName);
           
     // Push cmd.sh to /tmp/
-    exec(`${cfg.sdb} -s ${cfg.target} push "${localSh}" "${remoteSh}"`);
+    exec(`${sdb} -s ${cfg.target} push "${localSh}" "${remoteSh}"`);
 
     // Execute /tmp/cmd.sh, output to /tmp/cmd.out
-    exec(`${cfg.sdb} -s ${cfg.target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
+    exec(`${sdb} -s ${cfg.target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
 
     // Tarball /tmp/cmd.out into /tmp/cmd.gz
-    exec(`${cfg.sdb} -s ${cfg.target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
+    exec(`${sdb} -s ${cfg.target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
 
     // Pull /tmp/cmd.gz
-    exec(`${cfg.sdb} -s ${cfg.target} pull "${remoteGz}" "${localGz}"`);
+    exec(`${sdb} -s ${cfg.target} pull "${remoteGz}" "${localGz}"`);
 
     // Remove all the remote files
-    exec(`${cfg.sdb} -s ${cfg.target} shell rm -rf "${remoteSh}"`);
-    exec(`${cfg.sdb} -s ${cfg.target} shell rm -rf "${remoteOut}"`);
-    exec(`${cfg.sdb} -s ${cfg.target} shell rm -rf "${remoteGz}"`);
+    exec(`${sdb} -s ${cfg.target} shell rm -rf "${remoteSh}"`);
+    exec(`${sdb} -s ${cfg.target} shell rm -rf "${remoteOut}"`);
+    exec(`${sdb} -s ${cfg.target} shell rm -rf "${remoteGz}"`);
 
     // Extract cmd.gz
     exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
@@ -207,7 +209,7 @@ int main(void) {
     writeFileSync(localC, main);
 
     // Clear the entire dlog
-    exec(`${cfg.sdb} -s ${cfg.target} dlog -c`);
+    exec(`${sdb} -s ${cfg.target} dlog -c`);
 
     // Instruct to compile main.c
     console.log(`
@@ -220,7 +222,7 @@ Waiting for the result...
     return new Promise(resolve => {
       const wait = _ => {
         // Fetch the log
-        const log = exec(`${cfg.sdb} -s ${cfg.target} dlog -d -v raw ${tag}:F`);
+        const log = exec(`${sdb} -s ${cfg.target} dlog -d -v raw ${tag}:F`);
 
         // Search for :>${remoteGz}
         const [__, remoteGz] = new RegExp(`:>(\/[^\n]+?${gzName})`).exec(log) || [];
@@ -230,7 +232,7 @@ Waiting for the result...
         }
 
         // Pull ${remoteGz}
-        exec(`${cfg.sdb} -s ${cfg.target} pull "${remoteGz}" "${localGz}"`);
+        exec(`${sdb} -s ${cfg.target} pull "${remoteGz}" "${localGz}"`);
 
         // Extract cmd.gz
         exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
