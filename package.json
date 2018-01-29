@@ -5,6 +5,12 @@
     "jison": "^0.4.18",
     "xml2js": "^0.4.19"
   },
+  "engines": {
+    "node": ">=9.4.0",
+    "yarn": ">=1.3.2"
+  },
+  "os": ["darwin", "linux"],
+  "cpu": ["x64", "ia32"],
   "scripts": {
     "build": "yarn run jison GetAll.jison"
   }
