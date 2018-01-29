@@ -12,6 +12,6 @@
   "os": ["darwin", "linux"],
   "cpu": ["x64", "ia32"],
   "scripts": {
-    "build": "yarn run jison GetAll.jison"
+    "prepublish": "yarn run jison GetAll.jison",
   }
 }
