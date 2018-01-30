@@ -1,8 +1,9 @@
 # Only for Dan
 GetAll.js
-rootfs
-tizen-sdk
-tmp
+*Tizen_Studio*
+tizen_studio/
+tmp/
+rootfs/
 db.json
 
 # Logs

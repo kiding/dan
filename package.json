@@ -13,5 +13,6 @@
   "cpu": ["x64", "ia32"],
   "scripts": {
     "prepublish": "yarn run jison GetAll.jison",
+    "install": "/bin/bash install.sh"
   }
 }
