@@ -11,6 +11,15 @@ R=`tput setaf 1`
 B=`tput bold`
 U=`tput smul`
 RST=`tput sgr0`
+
+# Check if current working directory path contains a space
+P=($PWD);
+if [[ ! -z ${P[1]} ]]; then
+  echo "❗️ ${U}Please move the project directory.${RST}"; \
+  echo "Tizen Studio has trouble working with paths containing ${B}whitespaces.${RST}"; \
+  echo "${R}Failed to finish installation.${RST}"; \
+  exit 1
+fi
 # Check the architecture
 if [[ `lsb_release -is` == 'Ubuntu' ]]; then
   M=`uname -m`
@@ -32,7 +41,7 @@ else
 fi
 
 # Variables
-TIZEN_STUDIO=`pwd`/tizen-studio
+TIZEN_STUDIO=$PWD/tizen-studio
 BIN=web-cli_Tizen_Studio_2.2_${ARCH}.bin
 URL=http://download.tizen.org/sdk/Installer/tizen-studio_2.2/${BIN}
 
@@ -40,13 +49,13 @@ PKG=./tizen-studio/package-manager/package-manager-cli.bin
 IDE=./tizen-studio/ide/TizenStudio.sh
 
 # Check if Tizen Studio is installed
-if [ ! -d ${TIZEN_STUDIO} ]; then
+if [ ! -d "${TIZEN_STUDIO}" ]; then
   # Download Tizen Studio CLI
   wget ${URL}
   chmod +x ${BIN}
 
   # Start the installer
-  ./${BIN} --accept-license ${TIZEN_STUDIO}
+  ./${BIN} --accept-license "${TIZEN_STUDIO}"
   rm ${BIN}
 fi
 
