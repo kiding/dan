@@ -3,17 +3,32 @@
 # Exit on error
 set -e
 
-# macOS or Ubuntu
-if [[ `uname` == 'Darwin' ]]; then
-  ARCH="macos-64"
-  DOWNLOADER='curl -O'
-elif [[ `lsb_release -is` == 'Ubuntu' ]]; then
-  if [[ `uname -m` == 'x86_64' ]]; then
+# Padding
+echo ""
+
+# Text decorators
+R=`tput setaf 1`
+B=`tput bold`
+U=`tput smul`
+RST=`tput sgr0`
+# Check the architecture
+if [[ `lsb_release -is` == 'Ubuntu' ]]; then
+  M=`uname -m`
+  if [[ $M == 'x86_64' ]]; then
     ARCH="ubuntu-64";
-  else
+  elif [[ $M == 'i686' ]]; then
     ARCH="ubuntu-32";
+  elif [[ $M == 'i386' ]]; then
+    ARCH="ubuntu-32";
+  else
+    echo "❗️ Tizen Studio does not support this architecture."; \
+    echo "${R}Failed to finish installation.${RST}"; \
+    exit 3
   fi
-  DOWNLOADER='wget'
+else
+  echo "❗️ Tizen Studio does not support this platform."; \
+  echo "${R}Failed to finish installation.${RST}"; \
+  exit 4
 fi
 
 # Variables
@@ -27,7 +42,7 @@ IDE=./tizen-studio/ide/TizenStudio.sh
 # Check if Tizen Studio is installed
 if [ ! -d ${TIZEN_STUDIO} ]; then
   # Download Tizen Studio CLI
-  ${DOWNLOADER} ${URL}
+  wget ${URL}
   chmod +x ${BIN}
 
   # Start the installer
@@ -39,10 +54,6 @@ fi
 ${PKG} install --accept-license WEARABLE-3.0-NativeAppDevelopment,cert-add-on,tizen-wearable-extension
 
 # Show further instructions
-R=`tput setaf 1`
-B=`tput bold`
-U=`tput smul`
-RST=`tput sgr0`
 echo ""; \
 echo "${B}++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++${RST}"; \
 echo ""; \
