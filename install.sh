@@ -20,6 +20,15 @@ if [[ ! -z ${P[1]} ]]; then
   echo "${R}Failed to finish installation.${RST}"; \
   exit 1
 fi
+
+# Check if this script is running on GUI
+if [[ -z "$DISPLAY" ]]; then
+  echo "❗️ ${U}Please try again on ${B}the desktop environment.${RST}"; \
+  echo "Tizen Studio IDE requires a graphical user interface."; \
+  echo "${R}Failed to finish installation.${RST}"; \
+  exit 2
+fi
+
 # Check the architecture
 if [[ `lsb_release -is` == 'Ubuntu' ]]; then
   M=`uname -m`
