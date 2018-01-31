@@ -68,9 +68,11 @@ echo "2️⃣  Create a Samsung certificate profile using ${B}Tools > Certificat
 echo "   ${U}Perform 1️⃣ first${RST} to make sure your target device is included in the DUID list. "; \
 echo "   → See how-to at ${U}http://developer.samsung.com/gear/develop/getting-certificates/create${RST}"; \
 echo ""; \
-echo "❗️ Now launching ${B}Tizen Studio IDE${RST}..."; \
+echo "❗️ Now try launching ${B}Tizen Studio IDE${RST}..."; \
 echo ""; \
 echo "${B}++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++${RST} "; \
 
 # Try launching IDE
 ${IDE} 1>/dev/null 2>/dev/null &
+
+exit 0
