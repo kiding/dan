@@ -65,10 +65,7 @@ async function introspect(runner) {
   - If interface is not null, call Properties.GetAll
 */
 
-  // let shelf = getData('names').map(name => ({ dest: name, object: '/', interface: null }));
-  let shelf = [
-  { dest: 'fi.w1.wpa_supplicant1', object: '/fi/w1/wpa_supplicant1', interface: null },
-  ];//debug
+  let shelf = getData('names').map(name => ({ dest: name, object: '/', interface: null }));
 
   while (shelf.length) {
     console.log(JSON.stringify(shelf));
