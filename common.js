@@ -144,7 +144,7 @@ module.exports = {
     exec(`${sdb} -s ${target} shell rm -rf "${remoteGz}"`);
 
     // Extract cmd.gz
-    exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
+    exec(`gzip -d -c "${gzName}" > "${outName}"`, {cwd: localGzCwd});
 
     // Read cmd.out
     const res = readFileSync(localOut, {encoding: 'utf-8'});
