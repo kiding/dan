@@ -1,5 +1,6 @@
 const { execSync } = require('child_process'),
       { readFileSync, writeFileSync } = require('fs'),
+      { parseString } = require('xml2js'),
       { join } = require('path'),
       { randomFillSync } = require('crypto');
 
@@ -10,6 +11,28 @@ const sdb = './tizen-studio/tools/sdb';
 const target = exec(`${sdb} devices | awk '/:/ {print $1; exit}'`).trim();
 if (!target) {
   throw new Error('Failed to find a target device.');
+}
+
+// Check if a security profile is active
+let active = '';
+
+parseString(
+  readFileSync('./tizen-studio-data/profile/profiles.xml', {encoding: 'utf-8'}),
+  {
+    mergeAttrs: true,
+    explicitArray: false
+  },
+  (err, result) => {
+    if (err) {
+      throw new Error(err);
+    }
+
+    ({ profiles: { active } } = result);
+  }
+);
+
+if (!active) {
+  throw new Error('Failed to find an active security profile.');
 }
 
 // Load db
