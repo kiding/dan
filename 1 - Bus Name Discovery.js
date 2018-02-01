@@ -1,4 +1,4 @@
-const { cfg, setData, runAsShell, runAsPkg } = require('./common');
+const { getData, setData, runAsShell, runAsPkg } = require('./common');
 
 const { join } = require('path'),
       { readFileSync, statSync, readdirSync } = require('fs');
@@ -50,7 +50,7 @@ function deduplicate(result = []) {
 
 async function main() {
   // Recursively grab the names from D-Bus service files
-  let names = getNamesFromRootfs(join(cfg.rootfs, '/usr/share/dbus-1/'));
+  let names = getNamesFromRootfs(join(getData('rootfs'), '/usr/share/dbus-1/'));
 
   // Grab the names of the running bus names
   names.push(...getNamesFromTarget());

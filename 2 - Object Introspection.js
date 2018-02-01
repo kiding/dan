@@ -1,4 +1,4 @@
-const { cfg, getData, setData, runAsShell, runAsPkg } = require('./common'),
+const { getData, setData, runAsShell, runAsPkg } = require('./common'),
       { randomFillSync } = require('crypto'),
       { parseString } = require('xml2js'),
       { parse: parseGetAll } = require('./GetAll');

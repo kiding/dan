@@ -3,21 +3,15 @@ const { execSync } = require('child_process'),
       { join } = require('path'),
       { randomFillSync } = require('crypto');
 
-// Load cfg
-const cfg = {
-              ...{
-                target: '192.168.72.111',
-                rootfs: './rootfs/',
-                db: './db.json'
-              },
-              ...JSON.parse(readFileSync('./config.json', {encoding: 'utf-8'}))
-            };
 
-// Load db
-const db = {...(existsSync(cfg.db) ? JSON.parse(readFileSync(cfg.db, {encoding: 'utf-8'})) : {})};
 
 // Tizen Studio CLIs
 const sdb = './tizen-studio/tools/sdb';
+// Load db
+const db =  {
+              rootfs: './rootfs/', // Default value
+              ...JSON.parse(readFileSync('./db.json', {encoding: 'utf-8'}))
+            };
 
 // Temp folder
 const tmp = './tmp/';
@@ -53,19 +47,19 @@ function clean() {
 }
 
 function connect() {
-  console.log(`Connecting to ${cfg.target}...`);
+  console.log(`Connecting to ${db.target}...`);
 
   let test = '';
   do {
     try {
       exec(`${sdb} disconnect`);
-      exec(`${sdb} connect ${cfg.target}`);
+      exec(`${sdb} connect ${db.target}`);
     } catch (e) {
       console.error(e.message);
     }
 
     try {
-      test = exec(`${sdb} -s ${cfg.target} shell echo 1`);
+      test = exec(`${sdb} -s ${db.target} shell echo 1`);
     } catch (e) {
       console.error(e.message);
     }
@@ -73,8 +67,6 @@ function connect() {
 }
 
 module.exports = {
-  cfg: cfg,
-
   getData: key => db[key],
 
   setData: (key, value) => {
@@ -97,7 +89,7 @@ module.exports = {
     writeFileSync(localSh, cmd);
 
     /**
-     * Folder path on the remote cfg.target
+     * Folder path on the remote target
      * A safe place that:
      * - User::Shell can read/write
      * - sdb can push/pull
@@ -114,21 +106,21 @@ module.exports = {
     const remoteGz = join(remotePwd, gzName);
           
     // Push cmd.sh to /tmp/
-    exec(`${sdb} -s ${cfg.target} push "${localSh}" "${remoteSh}"`);
+    exec(`${sdb} -s ${db.target} push "${localSh}" "${remoteSh}"`);
 
     // Execute /tmp/cmd.sh, output to /tmp/cmd.out
-    exec(`${sdb} -s ${cfg.target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
+    exec(`${sdb} -s ${db.target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
 
     // Tarball /tmp/cmd.out into /tmp/cmd.gz
-    exec(`${sdb} -s ${cfg.target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
+    exec(`${sdb} -s ${db.target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
 
     // Pull /tmp/cmd.gz
-    exec(`${sdb} -s ${cfg.target} pull "${remoteGz}" "${localGz}"`);
+    exec(`${sdb} -s ${db.target} pull "${remoteGz}" "${localGz}"`);
 
     // Remove all the remote files
-    exec(`${sdb} -s ${cfg.target} shell rm -rf "${remoteSh}"`);
-    exec(`${sdb} -s ${cfg.target} shell rm -rf "${remoteOut}"`);
-    exec(`${sdb} -s ${cfg.target} shell rm -rf "${remoteGz}"`);
+    exec(`${sdb} -s ${db.target} shell rm -rf "${remoteSh}"`);
+    exec(`${sdb} -s ${db.target} shell rm -rf "${remoteOut}"`);
+    exec(`${sdb} -s ${db.target} shell rm -rf "${remoteGz}"`);
 
     // Extract cmd.gz
     exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
@@ -209,7 +201,7 @@ int main(void) {
     writeFileSync(localC, main);
 
     // Clear the entire dlog
-    exec(`${sdb} -s ${cfg.target} dlog -c`);
+    exec(`${sdb} -s ${db.target} dlog -c`);
 
     // Instruct to compile main.c
     console.log(`
@@ -222,7 +214,7 @@ Waiting for the result...
     return new Promise(resolve => {
       const wait = _ => {
         // Fetch the log
-        const log = exec(`${sdb} -s ${cfg.target} dlog -d -v raw ${tag}:F`);
+        const log = exec(`${sdb} -s ${db.target} dlog -d -v raw ${tag}:F`);
 
         // Search for :>${remoteGz}
         const [__, remoteGz] = new RegExp(`:>(\/[^\n]+?${gzName})`).exec(log) || [];
@@ -232,7 +224,7 @@ Waiting for the result...
         }
 
         // Pull ${remoteGz}
-        exec(`${sdb} -s ${cfg.target} pull "${remoteGz}" "${localGz}"`);
+        exec(`${sdb} -s ${db.target} pull "${remoteGz}" "${localGz}"`);
 
         // Extract cmd.gz
         exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
