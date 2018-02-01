@@ -1,12 +1,17 @@
 const { execSync } = require('child_process'),
-      { existsSync, readFileSync, writeFileSync } = require('fs'),
+      { readFileSync, writeFileSync } = require('fs'),
       { join } = require('path'),
       { randomFillSync } = require('crypto');
 
-
-
 // Tizen Studio CLIs
 const sdb = './tizen-studio/tools/sdb';
+
+// Check if a target device is connected
+const target = exec(`${sdb} devices | awk '/:/ {print $1; exit}'`).trim();
+if (!target) {
+  throw new Error('Failed to find a target device.');
+}
+
 // Load db
 const db =  {
               rootfs: './rootfs/', // Default value
@@ -47,19 +52,12 @@ function clean() {
 }
 
 function connect() {
-  console.log(`Connecting to ${db.target}...`);
+  console.log(`Connecting to ${target}...`);
 
   let test = '';
   do {
     try {
-      exec(`${sdb} disconnect`);
-      exec(`${sdb} connect ${db.target}`);
-    } catch (e) {
-      console.error(e.message);
-    }
-
-    try {
-      test = exec(`${sdb} -s ${db.target} shell echo 1`);
+      test = exec(`${sdb} -s ${target} shell echo 1`);
     } catch (e) {
       console.error(e.message);
     }
@@ -106,21 +104,21 @@ module.exports = {
     const remoteGz = join(remotePwd, gzName);
           
     // Push cmd.sh to /tmp/
-    exec(`${sdb} -s ${db.target} push "${localSh}" "${remoteSh}"`);
+    exec(`${sdb} -s ${target} push "${localSh}" "${remoteSh}"`);
 
     // Execute /tmp/cmd.sh, output to /tmp/cmd.out
-    exec(`${sdb} -s ${db.target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
+    exec(`${sdb} -s ${target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
 
     // Tarball /tmp/cmd.out into /tmp/cmd.gz
-    exec(`${sdb} -s ${db.target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
+    exec(`${sdb} -s ${target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
 
     // Pull /tmp/cmd.gz
-    exec(`${sdb} -s ${db.target} pull "${remoteGz}" "${localGz}"`);
+    exec(`${sdb} -s ${target} pull "${remoteGz}" "${localGz}"`);
 
     // Remove all the remote files
-    exec(`${sdb} -s ${db.target} shell rm -rf "${remoteSh}"`);
-    exec(`${sdb} -s ${db.target} shell rm -rf "${remoteOut}"`);
-    exec(`${sdb} -s ${db.target} shell rm -rf "${remoteGz}"`);
+    exec(`${sdb} -s ${target} shell rm -rf "${remoteSh}"`);
+    exec(`${sdb} -s ${target} shell rm -rf "${remoteOut}"`);
+    exec(`${sdb} -s ${target} shell rm -rf "${remoteGz}"`);
 
     // Extract cmd.gz
     exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
@@ -201,7 +199,7 @@ int main(void) {
     writeFileSync(localC, main);
 
     // Clear the entire dlog
-    exec(`${sdb} -s ${db.target} dlog -c`);
+    exec(`${sdb} -s ${target} dlog -c`);
 
     // Instruct to compile main.c
     console.log(`
@@ -214,7 +212,7 @@ Waiting for the result...
     return new Promise(resolve => {
       const wait = _ => {
         // Fetch the log
-        const log = exec(`${sdb} -s ${db.target} dlog -d -v raw ${tag}:F`);
+        const log = exec(`${sdb} -s ${target} dlog -d -v raw ${tag}:F`);
 
         // Search for :>${remoteGz}
         const [__, remoteGz] = new RegExp(`:>(\/[^\n]+?${gzName})`).exec(log) || [];
@@ -224,7 +222,7 @@ Waiting for the result...
         }
 
         // Pull ${remoteGz}
-        exec(`${sdb} -s ${db.target} pull "${remoteGz}" "${localGz}"`);
+        exec(`${sdb} -s ${target} pull "${remoteGz}" "${localGz}"`);
 
         // Extract cmd.gz
         exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
