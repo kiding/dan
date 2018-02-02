@@ -41,21 +41,17 @@ const db =  {
               ...JSON.parse(readFileSync('./db.json', {encoding: 'utf-8'}))
             };
 
-// Temp folder
-const tmp = './tmp/';
 
-// Batch command
-const shName = 'cmd.sh',
-      localSh = join(tmp, shName);
+const localWd = './tmp/',                           // Working directory on the local machine
 
-// (Decompressed) result from the batch command
-const outName = 'cmd.out',
-      localOut = join(tmp, outName);
+      shName = 'dan_cmd.sh',                        // Batch command: file name
+      localSh = join(localWd, shName),              // ...          : file path
 
-// Compressed result
-const gzName = 'cmd.gz',
-      localGzCwd = tmp,
-      localGz = join(localGzCwd, gzName);
+      outName = 'dan_cmd.out',                      // Decompressed result: file name
+      localOut = join(localWd, outName),            // ...                : file path
+
+      gzName = 'dan_cmd.gz',                        // Compressed result: file name
+      localGz = join(localWd, gzName);              // ...              : file path
 
 // Source code of the helper Gear application
 const cName = 'main.c',
@@ -70,17 +66,17 @@ function exec() {
 }
 
 function clean() {
-  exec(`rm -rf ${tmp}`);
-  exec(`mkdir -p ${tmp}`);
+  exec(`rm -rf ${localWd}`);
+  exec(`mkdir -p ${localWd}`);
 }
 
 function connect() {
-  console.log(`Connecting to ${target}...`);
+  console.log(`Connecting to "${target}"...`);
 
   let test = '';
   do {
     try {
-      test = exec(`${sdb} -s ${target} shell echo 1`);
+      test = exec(`${sdb} -s "${target}" shell echo 1`);
     } catch (e) {
       console.error(e.message);
     }
@@ -97,7 +93,7 @@ module.exports = {
 
   // Run command as User::Shell
   runAsShell: cmd => {
-    // Clean tmp folder
+    // Clean localWd folder
     clean();
 
     // Connect to the target device
@@ -106,50 +102,44 @@ module.exports = {
     // cmd should be always string
     cmd += '';
 
-    // Create cmd.sh
+    // Create localSh
     writeFileSync(localSh, cmd);
 
     /**
-     * Folder path on the remote target
+     * Working directory on the remote target
      * A safe place that:
      * - User::Shell can read/write
      * - sdb can push/pull
      */
-    const remotePwd = '/opt/usr/home/owner/data/';
-
-    // Batch command
-    const remoteSh = join(remotePwd, shName);
-
-    // (Decompressed) result from the batch command
-    const remoteOut = join(remotePwd, outName);
-
-    // Compressed result
-    const remoteGz = join(remotePwd, gzName);
+    const remoteWd = '/opt/usr/home/owner/data/',
+          remoteSh = join(remoteWd, shName),   // Batch command: file path
+          remoteOut = join(remoteWd, outName), // Decompressed result: file path
+          remoteGz = join(remoteWd, gzName);   // Compressed result: file path
           
-    // Push cmd.sh to /tmp/
-    exec(`${sdb} -s ${target} push "${localSh}" "${remoteSh}"`);
+    // Push localSh to remoteSh
+    exec(`${sdb} -s "${target}" push "${localSh}" "${remoteSh}"`);
 
-    // Execute /tmp/cmd.sh, output to /tmp/cmd.out
-    exec(`${sdb} -s ${target} shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
+    // Execute remoteSh, output to remoteOut
+    exec(`${sdb} -s "${target}" shell bash -c 'sh "${remoteSh}" > "${remoteOut}" 2>&1'`);
 
-    // Tarball /tmp/cmd.out into /tmp/cmd.gz
-    exec(`${sdb} -s ${target} shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
+    // Gzip remoteOut into remoteGz
+    exec(`${sdb} -s "${target}" shell bash -c 'gzip -c "${remoteOut}" > "${remoteGz}"'`);
 
-    // Pull /tmp/cmd.gz
-    exec(`${sdb} -s ${target} pull "${remoteGz}" "${localGz}"`);
+    // Pull remoteGz to localGz
+    exec(`${sdb} -s "${target}" pull "${remoteGz}" "${localGz}"`);
 
     // Remove all the remote files
-    exec(`${sdb} -s ${target} shell rm -rf "${remoteSh}"`);
-    exec(`${sdb} -s ${target} shell rm -rf "${remoteOut}"`);
-    exec(`${sdb} -s ${target} shell rm -rf "${remoteGz}"`);
+    exec(`${sdb} -s "${target}" shell rm -rf "${remoteSh}"`);
+    exec(`${sdb} -s "${target}" shell rm -rf "${remoteOut}"`);
+    exec(`${sdb} -s "${target}" shell rm -rf "${remoteGz}"`);
 
-    // Extract cmd.gz
-    exec(`gzip -d -c "${gzName}" > "${outName}"`, {cwd: localGzCwd});
+    // Extract localGz into localOut
+    exec(`gzip -d -c "${gzName}" > "${outName}"`, {cwd: localWd});
 
-    // Read cmd.out
+    // Read localOut
     const res = readFileSync(localOut, {encoding: 'utf-8'});
 
-    // Clean tmp folder
+    // Clean localWd folder
     clean();
 
     return res;
@@ -157,7 +147,7 @@ module.exports = {
 
   // Run command as User::Pkg
   runAsPkg: async cmd => {
-    // Clean tmp folder
+    // Clean localWd folder
     clean();
 
     // Connect to the target device
@@ -175,7 +165,7 @@ module.exports = {
     // Create a random tag for dlog parsing
     const tag = randomFillSync(Buffer.alloc(9)).toString('base64');
 
-    // Create main.c
+    // Create the source code
     const main = `
 #include <stdio.h>
 #include <stdlib.h>
@@ -201,18 +191,22 @@ int main(void) {
   char remoteGz[BUF_MAX] = {0};
   snprintf(remoteGz, BUF_MAX, "%s${gzName}", dataPath);
 
+  // Create remoteSh
   FILE *fp = fopen(remoteSh, "w");
   fputs(cmd, fp);
   fclose(fp);
 
   char _cmd[BUF_MAX] = {0};
 
+  // Execute remoteSh, output to remoteOut
   snprintf(_cmd, BUF_MAX, "bash -c 'sh \\"%s\\" > \\"%s\\" 2>&1'", remoteSh, remoteOut);
   system(_cmd);
 
+  // Gzip remoteOut into remoteGz
   snprintf(_cmd, BUF_MAX, "bash -c 'gzip -c \\"%s\\" > \\"%s\\"'", remoteOut, remoteGz);
   system(_cmd);
 
+  // Signal the finish with remoteGz
   dlog_print(DLOG_FATAL, TAG, ":>%s", remoteGz);
 
   return 0;
@@ -222,7 +216,7 @@ int main(void) {
     writeFileSync(localC, main);
 
     // Clear the entire dlog
-    exec(`${sdb} -s ${target} dlog -c`);
+    exec(`${sdb} -s "${target}" dlog -c`);
 
     // Instruct to compile main.c
     console.log(`
@@ -235,25 +229,25 @@ Waiting for the result...
     return new Promise(resolve => {
       const wait = _ => {
         // Fetch the log
-        const log = exec(`${sdb} -s ${target} dlog -d -v raw ${tag}:F`);
+        const log = exec(`${sdb} -s "${target}" dlog -d -v raw ${tag}:F`);
 
         // Search for :>${remoteGz}
-        const [__, remoteGz] = new RegExp(`:>(\/[^\n]+?${gzName})`).exec(log) || [];
+        const [, remoteGz] = new RegExp(`:>(\/[^\n]+?${gzName})`).exec(log) || [];
         if (remoteGz === undefined) {
           setTimeout(wait, 5000);
           return;
         }
 
-        // Pull ${remoteGz}
-        exec(`${sdb} -s ${target} pull "${remoteGz}" "${localGz}"`);
+        // Pull remoteGz to localGz
+        exec(`${sdb} -s "${target}" pull "${remoteGz}" "${localGz}"`);
 
-        // Extract cmd.gz
-        exec(`gzip -d -c "${localGz}" > "${localOut}"`, {cwd: localGzCwd});
+        // Extract localGz into localOut
+        exec(`gzip -d -c "${gzName}" > "${outName}"`, {cwd: localWd});
 
-        // Read cmd.out
+        // Read localOut
         const res = readFileSync(localOut, {encoding: 'utf-8'});
 
-        // Clean tmp folder
+        // Clean localWd folder
         clean();
 
         // Return res
