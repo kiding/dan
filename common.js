@@ -5,7 +5,8 @@ const { execSync } = require('child_process'),
       { randomFillSync } = require('crypto');
 
 // Tizen Studio CLIs
-const sdb = './tizen-studio/tools/sdb';
+const sdb = './tizen-studio/tools/sdb',
+      cli = './tizen-studio/tools/ide/bin/tizen';
 
 // Check if a target device is connected
 const target = exec(`${sdb} devices | awk '/:/ {print $1; exit}'`).trim();
@@ -51,12 +52,17 @@ const localWd = './tmp/',                           // Working directory on the 
       localOut = join(localWd, outName),            // ...                : file path
 
       gzName = 'dan_cmd.gz',                        // Compressed result: file name
-      localGz = join(localWd, gzName);              // ...              : file path
+      localGz = join(localWd, gzName),              // ...              : file path
 
-// Source code of the helper Gear application
-const cName = 'main.c',
-      localC = join(tmp, cName);
+      pjName = 'dan_cmd',                           // User::Pkg: project name
+      localPj = join(localWd, pjName),              // ...      : project directory
+      localC = join(localPj, 'src', `${pjName}.c`), // ...      : source code file path
 
+      buildConf = 'Release',                        // ...      : build configuration
+      localBuild = join(localPj, buildConf),        // ...      : build output path
+      
+      pkgID = `org.example.${pjName}`,              // ...      : package id
+      pkgName = `${pkgID}-1.0.0-arm.tpk`;           // ...      : package file name
 
 function exec() {
   console.log([...arguments]);
@@ -213,18 +219,26 @@ int main(void) {
 }
     `;
 
+    // Create a new project
+    exec(`${cli} create native-project -p wearable-3.0 -t basic-ui -n "${pjName}" -- "${localWd}"`);
+
+    // Write to the source code file
     writeFileSync(localC, main);
+
+    // Build the project
+    exec(`${cli} build-native -a arm -C "${buildConf}" -- "${localPj}"`);
+
+    // Package the project
+    exec(`${cli} package -t tpk -S on -s "${active}" -- "${localBuild}"`);
+
+    // Install the package
+    exec(`${cli} install -n "${pkgName}" -s "${target}" -- "${localBuild}"`);
 
     // Clear the entire dlog
     exec(`${sdb} -s "${target}" dlog -c`);
 
-    // Instruct to compile main.c
-    console.log(`
-===============================================
-Compile and run ${localC} on the target device.
-Waiting for the result...
-===============================================
-`);
+    // Run the package
+    exec(`${cli} run -p "${pkgID}" -s "${target}"`);
 
     return new Promise(resolve => {
       const wait = _ => {
@@ -249,6 +263,9 @@ Waiting for the result...
 
         // Clean localWd folder
         clean();
+
+        // Uninstall the package
+        exec(`${cli} uninstall -p "${pkgID}" -s "${target}"`);
 
         // Return res
         resolve(res);
