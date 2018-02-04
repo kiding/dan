@@ -161,8 +161,11 @@ module.exports = {
     // cmd should be always string
     cmd + '';
 
-    // Escape cmd; change `"` to ` \"`
-    cmd = cmd.replace(/"/g, ' \"');
+    // Escape cmd; change `\` to `\\`
+    cmd = cmd.replace(/\\/g, '\\\\');
+
+    // Escape cmd; change `"` to `\"`
+    cmd = cmd.replace(/"/g, '\\"');
 
     // Change `\n` to `"\n"`
     cmd = cmd.replace(/\n/g, '"\n"');
