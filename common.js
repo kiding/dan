@@ -78,8 +78,6 @@ function clean() {
 }
 
 function connect() {
-  console.log(`Connecting to "${target}"...`);
-
   let test = '';
   do {
     try {
