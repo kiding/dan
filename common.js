@@ -244,6 +244,8 @@ int main(void) {
 
     return new Promise(resolve => {
       const wait = _ => {
+        console.log('Waiting for the process to end...');
+
         // Fetch the log
         const log = exec(`${sdb} -s "${target}" dlog -d -v raw ${tag}:F`);
 
