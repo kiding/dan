@@ -120,7 +120,7 @@ async function introspect(runner) {
 
       // Parse the message
       const [, string] = /\n\s+string "(.+)"[\n\s]*$/s.exec(block) || [], // Introspect
-            [, array] = /\n\s+array \[(.+)\][\n\s]*$/s.exec(block) || []; // GetAll
+            [, array] = /\n\s+(array \[.+\])[\n\s]*$/s.exec(block) || []; // GetAll
       
       // If interface is null, Introspect is expected
       if (interface == null && string) {
@@ -202,7 +202,9 @@ async function introspect(runner) {
       }
       // If interface is not null, GetAll is expected
       else if (array) {
-        // FIXME: Use GetAll.jison
+        // parseGetAll may contain non-JSON-compliant hex `0xFF` values
+        eval(`var properties = ${parseGetAll(array)};`);
+        _root[dest][object][interface]['property'] = properties;
       }
       // Else: Invalid
       else {
@@ -216,12 +218,8 @@ async function introspect(runner) {
 
 async function main() {
   // Introspect and acquire root objects
-  const shell = await introspect(runAsShell),
-        pkg   = await introspect(runAsPkg);
-
-  // Save root
-  setData('root.shell', shell);
-  setData('root.pkg', pkg);
+  setData('root.shell', await introspect(runAsShell));
+  setData('root.pkg', await introspect(runAsPkg));
 }
 
 main();
