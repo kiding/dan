@@ -68,7 +68,7 @@ async function introspect(runner) {
   let shelf = getData('names').map(name => ({ dest: name, object: '/', interface: null }));
 
   while (shelf.length) {
-    console.log(JSON.stringify(shelf));
+    console.log("+ Shelf", JSON.stringify(shelf));
 
     // A random delimiter for this iteration
     const delimiter = `[:${randomFillSync(Buffer.alloc(20)).toString('base64')}:]`;
