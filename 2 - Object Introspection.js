@@ -3,8 +3,6 @@ const { getData, setData, runAsShell, runAsPkg } = require('./common'),
       { parseString } = require('xml2js'),
       { parse: parseGetAll } = require('./GetAll');
 
-const cnames = ['INVALID', 'BYTE', 'BOOLEAN', 'INT16', 'UINT16', 'INT32', 'UINT32', 'INT64', 'UINT64', 'DOUBLE', 'STRING', 'OBJECT_PATH', 'SIGNATURE', 'ARRAY', 'STRUCT', 'VARIANT', 'DICT ENTRY', 'UNIX FD'];
-
 async function parseXML(xml) {
   return new Promise((resolve, reject) => {
     parseString(xml, {
