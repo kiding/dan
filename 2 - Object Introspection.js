@@ -156,7 +156,7 @@ async function introspect(runner) {
                 arg
               } = v;
 
-              _root[dest][object][interface]['method'][method] = arg;
+              _root[dest][object][interface]['method'][method] = arg || [];
             });
           }
 
