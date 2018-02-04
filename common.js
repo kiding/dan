@@ -37,9 +37,10 @@ if (!active) {
 }
 
 // Load db
-const db =  {
+const dbPath = './db.json',
+      db =  {
               rootfs: './rootfs/', // Default value
-              ...JSON.parse(readFileSync('./db.json', {encoding: 'utf-8'}))
+              ...JSON.parse(readFileSync(dbPath, {encoding: 'utf-8'}))
             };
 
 
@@ -94,7 +95,7 @@ module.exports = {
 
   setData: (key, value) => {
     db[key] = value;
-    writeFileSync(cfg.db, JSON.stringify(db));
+    writeFileSync(dbPath, JSON.stringify(db));
   },
 
   // Run command as User::Shell
