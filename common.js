@@ -179,6 +179,8 @@ module.exports = {
 #include <stdlib.h>
 #include <dlog.h>
 #include <app_common.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define TAG "${tag}"
 #define BUF_MAX 2048
@@ -186,7 +188,7 @@ module.exports = {
 const char *cmd = "${cmd}";
 
 int main(void) {
-  dlog_print(DLOG_FATAL, TAG, "Launched!");
+  dlog_print(DLOG_FATAL, TAG, "Launched! Check aliveness at /proc/%d", getpid());
 
   const char *dataPath = app_get_data_path();
 
@@ -244,7 +246,7 @@ int main(void) {
 
     return new Promise(resolve => {
       const wait = _ => {
-        console.log('Waiting for the process to end...');
+        console.log('Waiting for a completion signal from the process...');
 
         // Fetch the log
         const log = exec(`${sdb} -s "${target}" dlog -d -v raw ${tag}:F`);
