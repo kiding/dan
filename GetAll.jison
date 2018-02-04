@@ -48,6 +48,7 @@ value: BYTE_T        hex      { $$ = $2; }
      | BOOLEAN_T     boolean  { $$ = $2; }
      | INTEGER_T     int      { $$ = $2; }
      | DOUBLE_T      frac     { $$ = $2; }
+     | DOUBLE_T      int      { $$ = $2; }
      | STRING_T      string   { $$ = $2; }
      | OBJECT_PATH_T string   { $$ = $2; }
      | SIGNATURE_T   string   { $$ = $2; }
