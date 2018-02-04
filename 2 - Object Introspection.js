@@ -103,7 +103,7 @@ async function introspect(runner) {
     for (const block of res.split(delimiter)) {
       // Parse metadata
       const [, metadata] = /^({.+})$/m.exec(block) || [, '{}'],
-            { dest, object, interface } = JSON.parseXML(metadata);
+            { dest, object, interface } = JSON.parse(metadata);
       if (!dest) {
         continue;
       }
