@@ -48,21 +48,26 @@ function deduplicate(result = []) {
   return Object.keys(dict);
 }
 
-async function main() {
-  // Recursively grab the names from D-Bus service files
-  let names = getNamesFromRootfs(join(getData('rootfs'), '/usr/share/dbus-1/'));
-
-  // Grab the names of the running bus names
-  names.push(...getNamesFromTarget());
-
-  // Remove duplicates from an array
-  names = deduplicate(names);
-
-  // Log
-  console.log(`#${names.length}: ${names}`);
-
-  // Save names
-  setData('names', names);
+// Check if dbusPath is readable
+const rootfs = getData('rootfs'),
+      dbusPath = join(rootfs, '/usr/share/dbus-1/');
+try {
+  readdirSync(dbusPath);
+} catch (e) {
+  throw new Error(`To continue, place the extracted filesystem at "${rootfs}". This value can be changed in db.json.`);
 }
 
-main();
+// Recursively grab the names from D-Bus service files
+let names = getNamesFromRootfs(dbusPath);
+
+// Grab the names of the running bus names
+names.push(...getNamesFromTarget());
+
+// Remove duplicates from an array
+names = deduplicate(names);
+
+// Log
+console.log(`#${names.length}: ${names}`);
+
+// Save names
+setData('names', names);
