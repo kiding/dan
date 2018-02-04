@@ -17,7 +17,7 @@ object\s+path        return 'OBJECT_PATH_T';
 dict\s+entry         return 'DICT_ENTRY_T';
 unix\s+fd            return 'UNIX_FD_T';
 
-[0-9]{2}\b(?!\.)     return 'HEX_INT';
+[0-9]{2}\b(?!\.)     return 'HEX_OR_INT';
 [0-9a-f]{2}\b(?!\.)  return 'HEX';
 [0-9]+\b(?!\.)       return 'INT';
 [0-9]+\.[0-9]+\b     return 'FRAC';
@@ -57,16 +57,16 @@ value: BYTE_T        hex      { $$ = $2; }
      | UNIX_FD_T     string   { $$ = $2; }
      ;
 
-hex: HEX_INT { $$ = `0x${$1}`; }
-   | HEX     { $$ = `0x${$1}`; }
+hex: HEX_OR_INT { $$ = `0x${$1}`; }
+   | HEX        { $$ = `0x${$1}`; }
    ;
 
 boolean: BOOLEAN { $$ = $1; };
 
-int: HEX_INT     { $$ = $1;  }
-   | '-' HEX_INT { $$ = -$2; }
-   | INT         { $$ = $1;  }
-   | '-' INT     { $$ = -$2; }
+int: HEX_OR_INT     { $$ = $1;  }
+   | '-' HEX_OR_INT { $$ = -$2; }
+   | INT            { $$ = $1;  }
+   | '-' INT        { $$ = -$2; }
    ;
 
 frac: FRAC       { $$ = $1;  }
