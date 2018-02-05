@@ -88,6 +88,10 @@ function connect() {
   } while (test.trim() != '1');
 }
 
+function generateTag() {
+  return randomFillSync(Buffer.alloc(12)).toString('base64');
+}
+
 module.exports = {
   getData: (key) => {
     if (key in db) {
@@ -101,6 +105,8 @@ module.exports = {
     db[key] = value;
     writeFileSync(dbPath, JSON.stringify(db));
   },
+
+  generateTag: generateTag,
 
   // Run command as User::Shell
   runAsShell: cmd => {
@@ -157,7 +163,7 @@ module.exports = {
   },
 
   // Run command as User::Pkg
-  runAsPkg: async cmd => {
+  runAsPkg: async (cmd, tag) => {
     // Clean localWd folder
     clean();
 
@@ -176,8 +182,8 @@ module.exports = {
     // Change `\n` to `"\n"`
     cmd = cmd.replace(/\n/g, '"\n"');
 
-    // Create a random tag for dlog parsing
-    const tag = randomFillSync(Buffer.alloc(9)).toString('base64');
+    // If not given, generate a random tag for dlog parsing
+    tag = tag || generateTag();
 
     // Create the source code
     const main = `
