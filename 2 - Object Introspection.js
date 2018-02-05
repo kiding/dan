@@ -82,12 +82,12 @@ async function introspect(runner) {
 
       // If interface is null, call Introspectable.Introspect
       if (interface == null) {
-        return cmd + `dbus-send --system --type=method_call --print-reply --dest=${dest} ${object} org.freedesktop.DBus.Introspectable.Introspect;\n`;
+        return cmd + `dbus-send --system --type=method_call --print-reply --reply-timeout=5000 --dest=${dest} ${object} org.freedesktop.DBus.Introspectable.Introspect;\n`;
       }
 
       // If interface is not null, call Properties.GetAll
       else {
-        return cmd + `dbus-send --system --type=method_call --print-reply --dest=${dest} ${object} org.freedesktop.DBus.Properties.GetAll string:${interface};\n`;
+        return cmd + `dbus-send --system --type=method_call --print-reply --reply-timeout=5000 --dest=${dest} ${object} org.freedesktop.DBus.Properties.GetAll string:${interface};\n`;
       }
     }, '');
 
