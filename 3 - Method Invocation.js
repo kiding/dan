@@ -72,8 +72,13 @@ async function invoke(_root, runner) {
 
                 switch (type) {
                   // Ignore
+                  case 'ServiceUnknown':
+                  case 'UnknownObject':
+                  case 'UnknownInterface':
                   case 'UnknownMethod':
+                  case 'UnknownProperty':
                   case 'AccessDenied':
+                  case 'NoReply':
                     return;
                 }
 
