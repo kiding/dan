@@ -241,6 +241,11 @@ int main(void) {
     // Package the project
     exec(`${cli} package -t tpk -S on -s "${active}" -- "${localBuild}"`);
 
+    // Try uninstalling the package first
+    try {
+      exec(`${cli} uninstall -p "${pkgID}" -s "${target}"`);
+    } catch (e) {}
+
     // Install the package
     exec(`${cli} install -n "${pkgName}" -s "${target}" -- "${localBuild}"`);
 
