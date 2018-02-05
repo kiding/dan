@@ -89,7 +89,13 @@ function connect() {
 }
 
 module.exports = {
-  getData: key => db[key],
+  getData: (key) => {
+    if (key in db) {
+      return db[key];
+    } else {
+      throw new Error(`${key} not found in the database. Try executing the prior steps.`);
+    }
+  },
 
   setData: (key, value) => {
     db[key] = value;
