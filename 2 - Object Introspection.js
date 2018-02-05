@@ -1,5 +1,4 @@
-const { getData, setData, runAsShell, runAsPkg } = require('./common'),
-      { randomFillSync } = require('crypto'),
+const { getData, setData, generateTag, runAsShell, runAsPkg } = require('./common'),
       { parseString } = require('xml2js'),
       { parse: parseGetAll } = require('./GetAll');
 
@@ -66,19 +65,23 @@ async function introspect(runner) {
   let shelf = getData('names').map(name => ({ dest: name, object: '/', interface: null }));
 
   while (shelf.length) {
-    console.log("+ Shelf", JSON.stringify(shelf));
+    // A random tag and delimiter for this iteration
+    const tag = generateTag(),
+          delimiter = `[:${tag}:]`;
 
-    // A random delimiter for this iteration
-    const delimiter = `[:${randomFillSync(Buffer.alloc(20)).toString('base64')}:]`;
-
-    const cmd = shelf.reduce((cmd, v) => {
+    const cmd = shelf.reduce((cmd, v, i) => {
       const { dest, object, interface } = v;
 
       // Delimiter
       cmd += `\necho '${delimiter}';\n`;
 
       // Metadata
-      cmd += `echo '${JSON.stringify(v)}';\n`;
+      const m = JSON.stringify(v);
+      cmd += `echo '${m}';\n`;
+
+      // dlog where we are
+      const l = shelf.length;
+      cmd += `echo -n -e '\\x03${tag}\\x00${i}/${l} ${m}\\x00' >> /dev/log_main;\n`;
 
       // If interface is null, call Introspectable.Introspect
       if (interface == null) {
@@ -92,7 +95,7 @@ async function introspect(runner) {
     }, '');
 
     // Run the command
-    const res = await runner(cmd);
+    const res = await runner(cmd, tag);
 
     // Flush shelf
     shelf = [];
