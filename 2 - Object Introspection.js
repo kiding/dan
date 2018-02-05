@@ -65,6 +65,9 @@ async function introspect(runner) {
   let shelf = getData('names').map(name => ({ dest: name, object: '/', interface: null }));
 
   while (shelf.length) {
+    const l = shelf.length;
+    console.log(`#${i}/${l}`);
+
     // A random tag and delimiter for this iteration
     const tag = generateTag(),
           delimiter = `[:${tag}:]`;
@@ -80,7 +83,6 @@ async function introspect(runner) {
       cmd += `echo '${m}';\n`;
 
       // dlog where we are
-      const l = shelf.length;
       cmd += `echo -n -e '\\x03${tag}\\x00${i}/${l} ${m}\\x00' >> /dev/log_main;\n`;
 
       // If interface is null, call Introspectable.Introspect
@@ -183,7 +185,7 @@ async function introspect(runner) {
             _root[dest][object][interface]['property'] = {};
 
             // Put it on shelf for later GetAll
-            shelf.push({dest: dest, object: object, interface: interface});
+            shelf.push({dest, object, interface});
           }
         });
 
@@ -195,7 +197,7 @@ async function introspect(runner) {
 
           // Put it on shelf for later Introspect
           shelf.push({
-            dest: dest,
+            dest,
             object: `${object}${object == '/' ? '' : '/'}${child}`,
             interface: null
           });
