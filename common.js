@@ -266,7 +266,7 @@ int main(void) {
         console.log('Waiting for a completion signal from the process...');
 
         // Fetch the log
-        const log = exec(`${sdb} -s "${target}" dlog -d -v raw ${tag}:F`);
+        const log = exec(`${sdb} -s "${target}" dlog -d -v raw ${tag}:* | tail -n 10`);
 
         // Search for :>${remoteGz}
         const [, remoteGz] = new RegExp(`:>(\/[^\n]+?${gzName})`).exec(log) || [];
