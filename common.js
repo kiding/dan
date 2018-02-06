@@ -89,7 +89,11 @@ function connect() {
 }
 
 function generateTag() {
-  return randomFillSync(Buffer.alloc(12)).toString('base64');
+  let tag = randomFillSync(Buffer.alloc(12)).toString('base64');
+  tag = tag.replace(/\+/g, '0');
+  tag = tag.replace(/\//g, '0');
+  tag = tag.replace(/=/g, '0');
+  return tag;
 }
 
 module.exports = {
