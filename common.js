@@ -177,6 +177,25 @@ module.exports = {
     // cmd should be always string
     cmd + '';
 
+    // Working directory: app_get_data_path()
+    const remoteWd = `/opt/usr/home/owner/apps_rw/${pkgID}/data/`,
+          remoteSh = join(remoteWd, shName),   // Batch command: file path
+          remoteOut = join(remoteWd, outName), // Decompressed result: file path
+          remoteGz = join(remoteWd, gzName);   // Compressed result: file path
+
+    // If not given, generate a random tag for dlog parsing
+    tag = tag || generateTag();
+
+    // Add control commands to cmd
+    cmd = cmd + `
+
+# Gzip remoteOut into remoteGz
+gzip -c "${remoteOut}" > "${remoteGz}";
+
+# Signal the finish with remoteGz
+echo -n -e '\\x03${tag}\\x00:>${remoteGz}\\x00' >> /dev/log_main;
+`;
+
     // Escape cmd; change `\` to `\\`
     cmd = cmd.replace(/\\/g, '\\\\');
 
@@ -184,10 +203,7 @@ module.exports = {
     cmd = cmd.replace(/"/g, '\\"');
 
     // Change `\n` to `"\n"`
-    cmd = cmd.replace(/\n/g, '"\n"');
-
-    // If not given, generate a random tag for dlog parsing
-    tag = tag || generateTag();
+    cmd = cmd.replace(/\n/g, '\\n"\n"');
 
     // Create the source code
     const main = `
@@ -206,34 +222,13 @@ const char *cmd = "${cmd}";
 int main(void) {
   dlog_print(DLOG_FATAL, TAG, "Launched! Check aliveness at /proc/%d", getpid());
 
-  const char *dataPath = app_get_data_path();
-
-  char remoteSh[BUF_MAX] = {0};
-  snprintf(remoteSh, BUF_MAX, "%s${shName}", dataPath);
-
-  char remoteOut[BUF_MAX] = {0};
-  snprintf(remoteOut, BUF_MAX, "%s${outName}", dataPath);
-
-  char remoteGz[BUF_MAX] = {0};
-  snprintf(remoteGz, BUF_MAX, "%s${gzName}", dataPath);
-
   // Create remoteSh
-  FILE *fp = fopen(remoteSh, "w");
+  FILE *fp = fopen("${remoteSh}", "w");
   fputs(cmd, fp);
   fclose(fp);
 
-  char _cmd[BUF_MAX] = {0};
-
   // Execute remoteSh, output to remoteOut
-  snprintf(_cmd, BUF_MAX, "bash -c 'sh \\"%s\\" > \\"%s\\" 2>&1'", remoteSh, remoteOut);
-  system(_cmd);
-
-  // Gzip remoteOut into remoteGz
-  snprintf(_cmd, BUF_MAX, "bash -c 'gzip -c \\"%s\\" > \\"%s\\"'", remoteOut, remoteGz);
-  system(_cmd);
-
-  // Signal the finish with remoteGz
-  dlog_print(DLOG_FATAL, TAG, ":>%s", remoteGz);
+  system("bash -c 'bash \\"${remoteSh}\\" > \\"${remoteOut}\\" 2>&1'");
 
   return 0;
 }
