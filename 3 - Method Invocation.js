@@ -68,7 +68,7 @@ async function invoke(_root, runner) {
                 }
 
                 // Check the error type
-                let [, type] = /\nError .+\.([A-Za-z]+):/s.exec(block) || [, 'Errortype'];
+                let [, type] = /\nError .+\.([A-Za-z]+):/s.exec(block) || [, '?'];
 
                 switch (type) {
                   // Ignore
