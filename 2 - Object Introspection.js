@@ -17,7 +17,7 @@ async function parseXML(xml) {
   });
 }
 
-async function introspect(runner) {
+async function introspect(names, runner) {
 /*
   _root = {
     bus.na.me: {          // Level 1: Destination
@@ -62,7 +62,7 @@ async function introspect(runner) {
   - If interface is not null, call Properties.GetAll
 */
 
-  let shelf = getData('names').map(name => ({ dest: name, object: '/', interface: null }));
+  let shelf = names.map(name => ({ dest: name, object: '/', interface: null }));
 
   while (shelf.length) {
     const l = shelf.length;
@@ -221,8 +221,8 @@ async function introspect(runner) {
 
 async function main() {
   // Introspect and acquire root objects
-  setData('root.shell', await introspect(runAsShell));
-  setData('root.pkg', await introspect(runAsPkg));
+  setData('root.shell', await introspect(getData('names.shell'), runAsShell));
+  setData('root.pkg', await introspect(getData('names.pkg'), runAsPkg));
 }
 
 main();

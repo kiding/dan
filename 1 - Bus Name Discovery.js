@@ -37,8 +37,8 @@ function getNamesFromRootfs(parentPath, result = []) {
   return result;
 }
 
-function getNamesFromTarget() {
-  const result = runAsShell('dbus-send --system --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames');
+async function getNamesFromTarget(runner) {
+  const result = await runner('dbus-send --system --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames');
   return result.match(/string "[^"]+"/g).map(v => v.split('"')[1]);
 }
 
@@ -48,26 +48,26 @@ function deduplicate(result = []) {
   return Object.keys(dict);
 }
 
-// Check if dbusPath is readable
-const rootfs = getData('rootfs'),
-      dbusPath = join(rootfs, '/usr/share/dbus-1/');
-try {
-  readdirSync(dbusPath);
-} catch (e) {
-  throw new Error(`To continue, place the extracted filesystem at "${rootfs}". This value can be changed in db.json.`);
+async function main() {
+  // Check if dbusPath is readable
+  const rootfs = getData('rootfs'),
+        dbusPath = join(rootfs, '/usr/share/dbus-1/');
+  try {
+    readdirSync(dbusPath);
+  } catch (e) {
+    throw new Error(`To continue, place the extracted filesystem at "${rootfs}". This value can be changed in db.json.`);
+  }
+
+  // Recursively grab the names from D-Bus service files
+  const fsNames = getNamesFromRootfs(dbusPath);
+
+  // Grab the names of the running bus names, then merge into one
+  const shellNames = [...fsNames, ...(await getNamesFromTarget(runAsShell))],
+        pkgNames   = [...fsNames, ...(await getNamesFromTarget(runAsPkg))];
+
+  // Save names
+  setData('names.shell', deduplicate(shellNames));
+  setData('names.pkg',   deduplicate(pkgNames));
 }
 
-// Recursively grab the names from D-Bus service files
-let names = getNamesFromRootfs(dbusPath);
-
-// Grab the names of the running bus names
-names.push(...getNamesFromTarget());
-
-// Remove duplicates from an array
-names = deduplicate(names);
-
-// Log
-console.log(`#${names.length}: ${names}`);
-
-// Save names
-setData('names', names);
+main();
