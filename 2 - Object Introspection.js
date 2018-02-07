@@ -66,7 +66,7 @@ async function introspect(runner) {
 
   while (shelf.length) {
     const l = shelf.length;
-    console.log(`#${l}`);
+    console.log(`+ Status: ${l} items are being processed.`);
 
     // A random tag and delimiter for this iteration
     const tag = generateTag(),

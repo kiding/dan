@@ -31,7 +31,7 @@ async function invoke(_root, runner) {
         limit = shelf.length;
 
   for(let i=0; i<limit; i+=step) {
-    console.log(`#${i}/${limit}`);
+    console.log(`+ Status: ${i} of ${limit} items were processed.`);
 
     const sh = shelf.slice(i, i+step),
           l = sh.length;
