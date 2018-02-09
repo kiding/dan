@@ -145,13 +145,10 @@ async function introspect(names, runner) {
           } = v;
 
           // Initialize _root[dest][object][interface] (Level 3)
-          _root[dest][object][interface] = {};
+          _root[dest][object][interface] = { 'method': {}, 'signal': {}, 'property': {} };
 
           // Found methods,
           if (methods) {
-            // Initialize _root[dest][object][interface]['method'] (Level 4)
-            _root[dest][object][interface]['method'] = {};
-
             // methods: Enumerate and register
             methods.forEach(v => {
               const {
@@ -165,9 +162,6 @@ async function introspect(names, runner) {
 
           // Found signals,
           if (signals) {
-            // Initialize _root[dest][object][interface]['signal'] (Level 4)
-            _root[dest][object][interface]['signal'] = {};
-
             // signals: Enumerate and register
             signals.forEach(v => {
               const {
@@ -181,9 +175,6 @@ async function introspect(names, runner) {
 
           // Found property,
           if (property) {
-            // Initialize _root[dest][object][interface]['property'] (Level 4)
-            _root[dest][object][interface]['property'] = {};
-
             // Put it on shelf for later GetAll
             shelf.push({dest, object, interface});
           }
