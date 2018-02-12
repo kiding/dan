@@ -111,22 +111,24 @@ async function introspect(names, runner) {
         continue;
       }
 
-      // Initialize _root[dest] (Level 1)
-      if (!_root[dest]) {
-        _root[dest] = {};
-      }
-
-      // Initialize _root[dest][object] (Level 2)
-      if (!_root[dest][object]) {
-        _root[dest][object] = {};
-      }
-
       // Parse the message
       const [, string] = /\n\s+string "(.+)"[\n\s]*$/s.exec(block) || [], // Introspect
             [, array] = /\n\s+(array \[.+\])[\n\s]*$/s.exec(block) || []; // GetAll
       
       // If interface is null, Introspect is expected
       if (interface == null && string) {
+        // Initialize _root[dest][object] only if any introspect is succeeded
+
+        // Initialize _root[dest] (Level 1)
+        if (!_root[dest]) {
+          _root[dest] = {};
+        }
+
+        // Initialize _root[dest][object] (Level 2)
+        if (!_root[dest][object]) {
+          _root[dest][object] = {};
+        }
+
         // Parse XML, grab interfaces and children
         const {
           node: {
