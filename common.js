@@ -77,13 +77,15 @@ function clean() {
   exec(`mkdir -p ${localWd}`);
 }
 
-function connect() {
+async function connect() {
   let test = '';
   do {
     try {
       test = exec(`${sdb} -s "${target}" shell echo 1`);
     } catch (e) {
       console.error(e.message);
+      console.warn(`Waiting for the device ${target}...`);
+      await new Promise(cb => setTimeout(cb, 5000));
     }
   } while (test.trim() != '1');
 }
@@ -113,12 +115,12 @@ module.exports = {
   generateTag: generateTag,
 
   // Run command as User::Shell
-  runAsShell: cmd => {
+  runAsShell: async cmd => {
     // Clean localWd folder
     clean();
 
     // Connect to the target device
-    connect();
+    await connect();
 
     // cmd should be always string
     cmd += '';
@@ -172,7 +174,7 @@ module.exports = {
     clean();
 
     // Connect to the target device
-    connect();
+    await connect();
 
     // cmd should be always string
     cmd + '';
