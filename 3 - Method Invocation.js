@@ -75,7 +75,6 @@ async function invoke(_root, runner) {
                   case 'ServiceUnknown':
                   case 'UnknownObject':
                   case 'UnknownInterface':
-                  case 'UnknownMethod':
                   case 'UnknownProperty':
                   case 'AccessDenied':
                   case 'NoReply':
