@@ -1,4 +1,4 @@
-const { getData, setData, generateTag, runAsShell, runAsPkg } = require('./common'),
+const { getData, setData, generateTag, runAsPkg } = require('./common'),
       { parseString } = require('xml2js'),
       { parse: parseGetAll } = require('./GetAll');
 
@@ -213,9 +213,8 @@ async function introspect(names, runner) {
 }
 
 async function main() {
-  // Introspect and acquire root objects
-  setData('root.shell', await introspect(getData('names.shell'), runAsShell));
-  setData('root.pkg', await introspect(getData('names.pkg'), runAsPkg));
+  // Introspect and acquire root object
+  setData('root', await introspect(getData('names'), runAsPkg));
 }
 
 main();

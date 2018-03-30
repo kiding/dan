@@ -1,4 +1,4 @@
-const { getData, setData, generateTag, runAsShell, runAsPkg } = require('./common');
+const { getData, setData, generateTag, runAsPkg } = require('./common');
 
 // Avoid actually executing the method
 const fake = `string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1 string:1`;
@@ -95,8 +95,7 @@ async function invoke(_root, runner) {
 
 async function main() {
   // Call every method to determine callable
-  setData('callable.shell', await invoke(getData('root.shell'), runAsShell));
-  setData('callable.pkg', await invoke(getData('root.pkg'), runAsPkg));
+  setData('callable', await invoke(getData('root'), runAsPkg));
 }
 
 main();

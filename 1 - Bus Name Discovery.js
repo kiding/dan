@@ -1,4 +1,4 @@
-const { getData, setData, runAsShell, runAsPkg } = require('./common');
+const { getData, setData, runAsPkg } = require('./common');
 
 const { join } = require('path'),
       { readFileSync, statSync, readdirSync } = require('fs');
@@ -62,12 +62,10 @@ async function main() {
   const fsNames = getNamesFromRootfs(dbusPath);
 
   // Grab the names of the running bus names, then merge into one
-  const shellNames = [...fsNames, ...(await getNamesFromTarget(runAsShell))],
-        pkgNames   = [...fsNames, ...(await getNamesFromTarget(runAsPkg))];
+  const names   = [...fsNames, ...(await getNamesFromTarget(runAsPkg))];
 
   // Save names
-  setData('names.shell', deduplicate(shellNames));
-  setData('names.pkg',   deduplicate(pkgNames));
+  setData('names', deduplicate(names));
 }
 
 main();
