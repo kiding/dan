@@ -1,6 +1,6 @@
 {
   "author": "kiding",
-  "license": "MIT",
+  "license": "GPLv3",
   "dependencies": {
     "jison": "^0.4.18",
     "xml2js": "^0.4.19"
