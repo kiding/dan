@@ -7,10 +7,10 @@ set -e
 echo ""
 
 # Text decorators
-R=`tput setaf 1`
-B=`tput bold`
-U=`tput smul`
-RST=`tput sgr0`
+R=$(tput setaf 1)
+B=$(tput bold)
+U=$(tput smul)
+RST=$(tput sgr0)
 
 # Check if current working directory path contains a space
 P=($PWD);
@@ -30,8 +30,8 @@ if [[ -z "$DISPLAY" ]]; then
 fi
 
 # Check the architecture
-if [[ `lsb_release -is` == 'Ubuntu' ]]; then
-  M=`uname -m`
+if [[ $(lsb_release -is) == 'Ubuntu' ]]; then
+  M=$(uname -m)
   if [[ $M == 'x86_64' ]]; then
     ARCH="ubuntu-64";
   elif [[ $M == 'i686' ]]; then
