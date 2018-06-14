@@ -1,18 +1,16 @@
-# Dan the D-Bus Analyzer
+# Dan: tizen-wearable-3.0
 
-Automatic privilege evaluation of D-Bus services on a remote device.
+Fulfill the requirements of `master` branch first.
 
-## Supported Platforms
+Run `yarn install && yarn run all` to perform all procedures.
 
-> See branches of this Git repository.
+## Additional Requirements
 
-* tizen-wearable-3.0
+* Tizen Wearable 3.0 device
+  * Connected in the same network
+* [Ubuntu Desktop](https://www.ubuntu.com/download/desktop)
+* [Oracle JDK 8](http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html)
+* libwebkitgtk-1.0-0
+* rpm2cpio
+* build-essential
 
-## Requirements
-
-* [node.js](https://nodejs.org/en/download/current/)
-* [yarn](https://yarnpkg.com/en/docs/install)
-
-## License
-
-GPLv3
