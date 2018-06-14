@@ -69,7 +69,7 @@ if [ ! -d "${TIZEN_STUDIO}" ]; then
 fi
 
 # Install the essential packages
-${PKG} install --accept-license WEARABLE-3.0-NativeAppDevelopment,cert-add-on,tizen-wearable-extension
+${PKG} install --accept-license WEARABLE-2.3.2-NativeAppDevelopment,cert-add-on,tizen-wearable-extension
 
 # Show further instructions
 echo ""; \

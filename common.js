@@ -55,7 +55,7 @@ const localWd = './tmp/',                           // Working directory on the 
       gzName = 'dan_cmd.gz',                        // Compressed result: file name
       localGz = join(localWd, gzName),              // ...              : file path
 
-      pjName = 'dan_cmd',                           // User::Pkg: project name
+      pjName = 'dan_cmd',                           // `app`    : project name
       localPj = join(localWd, pjName),              // ...      : project directory
       localC = join(localPj, 'src', `${pjName}.c`), // ...      : source code file path
 
@@ -114,7 +114,7 @@ module.exports = {
 
   generateTag: generateTag,
 
-  // Run command as User::Shell
+  // Run command as `developer`
   runAsShell: async cmd => {
     // Clean localWd folder
     clean();
@@ -131,10 +131,10 @@ module.exports = {
     /**
      * Working directory on the remote target
      * A safe place that:
-     * - User::Shell can read/write
+     * - `developer` can read/write
      * - sdb can push/pull
      */
-    const remoteWd = '/opt/usr/home/owner/data/',
+    const remoteWd = '/home/developer/',
           remoteSh = join(remoteWd, shName),   // Batch command: file path
           remoteOut = join(remoteWd, outName), // Decompressed result: file path
           remoteGz = join(remoteWd, gzName);   // Compressed result: file path
@@ -168,7 +168,7 @@ module.exports = {
     return res;
   },
 
-  // Run command as User::Pkg
+  // Run command as `app`
   runAsPkg: async (cmd, tag) => {
     // Clean localWd folder
     clean();
@@ -180,7 +180,7 @@ module.exports = {
     cmd + '';
 
     // Working directory: app_get_data_path()
-    const remoteWd = `/opt/usr/home/owner/apps_rw/${pkgID}/data/`,
+    const remoteWd = `/opt/usr/apps/${pkgID}/data/`,
           remoteSh = join(remoteWd, shName),   // Batch command: file path
           remoteOut = join(remoteWd, outName), // Decompressed result: file path
           remoteGz = join(remoteWd, gzName);   // Compressed result: file path
@@ -193,9 +193,6 @@ module.exports = {
 
 # Gzip remoteOut into remoteGz
 gzip -c "${remoteOut}" > "${remoteGz}";
-
-# Signal the finish with remoteGz
-echo -n -e '\\x03${tag}\\x00:>${remoteGz}\\x00' >> /dev/log_main;
 `;
 
     // Escape cmd; change `\` to `\\`
@@ -232,12 +229,14 @@ int main(void) {
   // Execute remoteSh, output to remoteOut
   system("bash -c 'bash \\"${remoteSh}\\" > \\"${remoteOut}\\" 2>&1'");
 
+  dlog_print(DLOG_FATAL, TAG, ":>${remoteGz}");
+
   return 0;
 }
     `;
 
     // Create a new project
-    exec(`${cli} create native-project -p wearable-3.0 -t basic-ui -n "${pjName}" -- "${localWd}"`);
+    exec(`${cli} create native-project -p wearable-2.3.2 -t basic-ui -n "${pjName}" -- "${localWd}"`);
 
     // Write to the source code file
     writeFileSync(localC, main);
