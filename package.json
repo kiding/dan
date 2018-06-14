@@ -1,6 +1,6 @@
 {
   "author": "kiding",
-  "license": "GPLv3",
+  "license": "GPL-3.0-or-later",
   "dependencies": {
     "jison": "^0.4.18",
     "xml2js": "^0.4.19"
