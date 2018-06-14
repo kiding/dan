@@ -50,19 +50,20 @@ function deduplicate(result = []) {
 
 async function main() {
   // Check if dbusPath is readable
-  const rootfs = getData('rootfs'),
-        dbusPath = join(rootfs, '/usr/share/dbus-1/');
+  const dbusPath = getData('dbusPath');
   try {
     readdirSync(dbusPath);
   } catch (e) {
-    throw new Error(`To continue, place the extracted filesystem at "${rootfs}". This value can be changed in db.json.`);
+    throw new Error(`Place the extracted D-Bus service files at "${dbusPath}". This value can be changed in db.json.`);
   }
 
-  // Recursively grab the names from D-Bus service files
-  const fsNames = getNamesFromRootfs(dbusPath);
+  const names = [
+                  // Recursively grab the names from D-Bus service files
+                  ...(getNamesFromRootfs(dbusPath)), 
 
-  // Grab the names of the running bus names, then merge into one
-  const names   = [...fsNames, ...(await getNamesFromTarget(runAsPkg))];
+                  // Grab the names of the running bus names
+                  ...(await getNamesFromTarget(runAsPkg)) 
+                ]; 
 
   // Save names
   setData('names', deduplicate(names));
