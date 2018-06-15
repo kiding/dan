@@ -14,6 +14,19 @@ Automatic privilege evaluation of D-Bus services on a remote device.
 * [node.js](https://nodejs.org/en/download/current/)
 * [yarn](https://yarnpkg.com/en/docs/install)
 
+## Usage
+
+```bash
+yarn install
+yarn run all
+```
+
+The analyzer spawns a test process that has no privilege on a remote device. The process recursively scans through the D-Bus tree to acquire its structure; bus names, objects, interfaces, properties, methods, and signals. It tries to gather every property of every object, and to call every method of every interface for privilege evaluation. Finally, the data is gathered into the files for further analysis.
+
+* `db.json`: A simple JSON database for the analyzer, containing the D-Bus tree structure
+* `properties.log`: A list of properties accessible from the test process
+* `callables.log`: A list of methods callable from the test process, formatted as shell commands
+
 ## License
 
 GPLv3
