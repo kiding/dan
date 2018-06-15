@@ -17,6 +17,7 @@
     "1": "node '1 - Bus Name Discovery.js'",
     "2": "node '2 - Object Introspection.js'",
     "3": "node '3 - Method Invocation.js'",
-    "all": "yarn run 1 && yarn run 2 && yarn run 3"
+    "4": "node '4 - Prune and Print.js'",
+    "all": "yarn run 1 && yarn run 2 && yarn run 3 && yarn run 4"
   }
 }
