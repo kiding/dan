@@ -212,13 +212,15 @@ gzip -c "${remoteOut}" > "${remoteGz}";
 #include <app_common.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <app.h>
 
 #define TAG "${tag}"
 #define BUF_MAX 2048
 
 const char *cmd = "${cmd}";
 
-int main(void) {
+static bool app_create(void *data)
+{
   dlog_print(DLOG_FATAL, TAG, "Launched! Check aliveness at /proc/%d", getpid());
 
   // Create remoteSh
@@ -231,7 +233,15 @@ int main(void) {
 
   dlog_print(DLOG_FATAL, TAG, ":>${remoteGz}");
 
-  return 0;
+  return false;
+}
+
+int main(int argc, char *argv[])
+{
+  ui_app_lifecycle_callback_s event_callback = {0,};
+  event_callback.create = app_create;
+
+  return ui_app_main(argc, argv, &event_callback, NULL);
 }
     `;
 
