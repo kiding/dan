@@ -2,8 +2,6 @@
 
 Fulfill the requirements of `master` branch first.
 
-Run `yarn install && yarn run all` to perform all procedures.
-
 ## Additional Requirements
 
 * Tizen Wearable 3.0 device
