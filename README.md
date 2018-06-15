@@ -6,6 +6,7 @@ Automatic privilege evaluation of D-Bus services on a remote device.
 
 > See branches of this Git repository.
 
+* tizen-wearable-2.3.2
 * tizen-wearable-3.0
 
 ## Requirements
