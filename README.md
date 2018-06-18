@@ -21,7 +21,7 @@ yarn install
 yarn run all
 ```
 
-The analyzer spawns a test process that has no privilege on a remote device. The process recursively scans through the D-Bus tree to acquire its structure; bus names, objects, interfaces, properties, methods, and signals. It tries to gather every property of every object, and to call every method of every interface for privilege evaluation. Finally, the data is gathered into the files for further analysis.
+Dan spawns a test process with no privilege on a remote device. The process recursively scans through its D-Bus tree to acquire its structure; bus names, objects, interfaces, properties, methods, and signals. The analyzer tries to gather every property of every object, and to call every method of every interface for privilege evaluation. Finally, the data is written into the files for further analysis.
 
 * `db.json`: A simple JSON database for the analyzer, containing the D-Bus tree structure
 * `properties.log`: A list of properties accessible from the test process
