@@ -4,7 +4,7 @@
 
 Automatic privilege evaluation of D-Bus services on a remote device.
 
-Presented at [DEF CON 26.](https://media.defcon.org/DEF%20CON%2026/DEF%20CON%2026%20presentations/Dongsung%20Kim%20and%20Hyoung%20Kee%20Choi%20-%20Updated/DEFCON-26-Dongsung-Kim-and-Hyoung-Kee-Choi-Your-Watch-Can-Watch-You-Updated.pdf)
+Presented at DEF CON 26 ([slide](https://media.defcon.org/DEF%20CON%2026/DEF%20CON%2026%20presentations/Dongsung%20Kim%20and%20Hyoung%20Kee%20Choi%20-%20Updated/DEFCON-26-Dongsung-Kim-and-Hyoung-Kee-Choi-Your-Watch-Can-Watch-You-Updated.pdf), [video](https://youtu.be/3IdgBwbOT-g))
 
 ## Supported Platforms
 
